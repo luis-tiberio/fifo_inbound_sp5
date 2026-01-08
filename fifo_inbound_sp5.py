@@ -10,10 +10,29 @@ from gspread_dataframe import set_with_dataframe  # Import para upload de DataFr
 # =================== CONFIGURAÇÕES ===================
 DOWNLOAD_DIR = "/tmp/shopee_automation"
 SPREADSHEET_ID = "1Ie3u58e-PT1ZEQJE20a6GJB-icJEXBRVDVxTzxCqq4c"
-#JSON_KEYFILE = "C:/Users/SEAOps/Desktop/Eduardo/Não Mexer/FIFO INBOUND.json"  # coloque o caminho do JSON aqui
-# PLANILHA_NOME = "FIFO INBOUND SP5"       # nome da planilha
-ABA_NOME = "Base"                        # nome da aba fixa
+ABA_NOME = "Base"
+OPS_ID = os.environ.get('OPS_ID')
+OPS_SENHA = os.environ.get('OPS_SENHA')
 # =====================================================
+
+def rename_downloaded_file(DOWNLOAD_DIR, download_path):
+    """Renames the downloaded file to include the current hour."""
+    try:
+        current_hour = datetime.datetime.now().strftime("%H")
+        new_file_name = f"TO-Packed{current_hour}.zip"
+        new_file_path = os.path.join(download_dir, new_file_name)
+        if os.path.exists(new_file_path):
+            os.remove(new_file_path)
+        shutil.move(download_path, new_file_path)
+        print(f"Arquivo salvo como: {new_file_path}")
+        return new_file_path
+    except Exception as e:
+        print(f"Erro ao renomear o arquivo: {e}")
+        return None
+
+
+
+
 
 def unzip_and_process_data(zip_path, extract_to_dir):
     """
@@ -89,6 +108,106 @@ def update_google_sheet_with_dataframe(df_to_upload):
 async def main():
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
+
+    async with async_playwright() as p:
+        # Mantive os parâmetros de segurança e pop-up que funcionaram no código anterior
+        browser = await p.chromium.launch(
+            headless=False, 
+            args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--window-size=1920,1080"]
+        )
+        context = await browser.new_context(accept_downloads=True, viewport={"width": 1920, "height": 1080})
+        page = await context.new_page()
+        try:
+            # === LOGIN ===
+            print("Realizando login...")
+            await page.goto("https://spx.shopee.com.br/")
+            await page.wait_for_selector('xpath=//*[@placeholder="Ops ID"]', timeout=15000)
+            await page.locator('xpath=//*[@placeholder="Ops ID"]').fill(OPS_ID)
+            await page.locator('xpath=//*[@placeholder="Senha"]').fill(OPS_SENHA)
+            await page.locator('xpath=/html/body/div[1]/div/div[2]/div/div/div[1]/div[3]/form/div/div/button').click()
+            await page.wait_for_timeout(10000)
+            
+            # Tentar fechar popup se existir
+            try:
+                if await page.locator('.ssc-dialog-close').is_visible():
+                    await page.locator('.ssc-dialog-close').click()
+            except:
+                pass
+            
+            # === NAVEGAÇÃO E EXPORTAÇÃO ===
+            print("Navegando...")
+            await page.goto("https://spx.shopee.com.br/#/orderTracking")
+            await page.wait_for_timeout(8000)
+            
+            # Tratamento de Pop-up extra antes de exportar
+            try:
+                if await page.locator('.ssc-dialog-wrapper').is_visible():
+                     await page.keyboard.press("Escape")
+                     await page.wait_for_timeout(1000)
+            except:
+                pass
+
+            print("Exportando...")
+            await page.get_by_role('button', name='Exportar').click(force=True) #ok
+            await page.wait_for_timeout(5000)
+            # Clicar no elemento com texto "Exportar Pedido Avançado"
+            await page.get_by_text("Exportar Pedido Avançado").click()
+            #await page.locator('xpath=/html[1]/body[1]/span[4]/div[1]/div[1]/div[1]').click(force=True)
+            await page.wait_for_timeout(5000)
+            await page.get_by_role("treeitem", name="SOC_Received", exact=True).click(force=True)
+            await page.wait_for_timeout(5000)
+            d1 = 'SoC_SP_Cravinhos'
+            # Seleção Cravinhos
+
+            await page.get_by_text("+ adicionar à").nth(2).click()
+            
+            input1 = page.locator('xpath=/html/body/span[8]/div/div[1]/div/input') # "procurar por"
+            input1.click()
+            input1.fill(d1)
+            time.sleep(5)
+
+            await page.get_by_role("listitem", name="SoC_SP_Cravinhos", exact=True).click(force=True)
+
+            await page.get_by_role("button", name="Confirmar").click(force=True)
+            
+            print("Aguardando geração do relatório...")
+            await page.wait_for_timeout(60000) 
+
+#PAREI AQUI RETORNAR AMANHÃ
+
+            # === DOWNLOAD ===
+            print("Baixando...")
+            async with page.expect_download(timeout=120000) as download_info:
+                await page.get_by_role("button", name="Baixar").first.click(force=True)
+            
+            download = await download_info.value
+            download_path = os.path.join(DOWNLOAD_DIR, download.suggested_filename)
+            await download.save_as(download_path)
+            print(f"Download concluído: {download_path}")
+
+            # === PROCESSAMENTO ===
+            renamed_zip_path = rename_downloaded_file(DOWNLOAD_DIR, download_path)
+            
+            if renamed_zip_path:
+                final_dataframe = unzip_and_process_data(renamed_zip_path, DOWNLOAD_DIR)
+                update_google_sheet_with_dataframe(final_dataframe)
+                
+                if final_dataframe is not None:
+                    del final_dataframe
+                    gc.collect()
+
+        except Exception as e:
+            print(f"Erro durante a execução do Playwright: {e}")
+            traceback.print_exc()
+        finally:
+            await browser.close()
+            if os.path.exists(DOWNLOAD_DIR):
+                shutil.rmtree(DOWNLOAD_DIR)
+                print("Limpeza concluída.")
+
+    
+
+'''    
     try:
         zip_files = [os.path.join(DOWNLOAD_DIR, f) for f in os.listdir(DOWNLOAD_DIR) if f.lower().endswith(".zip")]
         
@@ -112,6 +231,7 @@ async def main():
 
     except Exception as e:
         print(f"❌ Erro no processo principal: {e}")
+'''
 
 if __name__ == "__main__":
     asyncio.run(main())
