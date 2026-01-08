@@ -1,11 +1,16 @@
 import asyncio
 import os
 import shutil
+import time
+import datetime
+import gc
+import traceback
 import pandas as pd
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 import zipfile
-from gspread_dataframe import set_with_dataframe  # Import para upload de DataFrame
+from gspread_dataframe import set_with_dataframe
+from playwright.async_api import async_playwright
 
 # =================== CONFIGURAÇÕES ===================
 DOWNLOAD_DIR = "/tmp/shopee_automation"
