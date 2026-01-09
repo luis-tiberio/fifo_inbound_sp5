@@ -156,7 +156,7 @@ async def main():
                 pass
 
             print("Exportando...")
-            await page.get_by_role("button", name="Exportar").click()
+            await page.locator("span").filter(has_text="Exportar").nth(2).click()
             # await page.get_by_role('button', name='Exportar').click(force=True) #ok
             await page.wait_for_timeout(5000)
             # Clicar no elemento com texto "Exportar Pedido Avançado"
