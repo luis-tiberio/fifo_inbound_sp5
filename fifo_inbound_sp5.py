@@ -156,6 +156,7 @@ async def main():
                 pass
 
             print("Exportando...")
+            await page.wait_for_timeout(5000)
             await page.locator('xpath=/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div[8]/div/span/div[2]/span/span').click()
             # await page.locator("span").filter(has_text="Exportar").nth(2).click()
             # await page.get_by_role('button', name='Exportar').click(force=True) #ok
