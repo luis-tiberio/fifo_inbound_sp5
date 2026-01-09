@@ -188,7 +188,7 @@ async def main():
             await page.get_by_role("button", name="Confirmar").click(force=True)
             
             print("Aguardando geração do relatório...")
-            await page.wait_for_timeout(60000) 
+            await page.wait_for_timeout(900000) 
 
 #PAREI AQUI RETORNAR AMANHÃ
 
