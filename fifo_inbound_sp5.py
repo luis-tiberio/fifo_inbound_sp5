@@ -155,6 +155,7 @@ async def main():
             except:
                 pass
 
+            '''
             print("Exportando...")
             await page.wait_for_timeout(5000)
 
@@ -163,8 +164,26 @@ async def main():
             # await page.locator("span").filter(has_text="Exportar").nth(2).click()
             # await page.get_by_role('button', name='Exportar').click(force=True) #ok
 
+            '''
+
+            print("Exportando...")
+
+            # Debug: conta quantos elementos existem
+            exportar_loc = page.locator("span").filter(has_text="Exportar")
+            count = await exportar_loc.count()
+            print(f"🔍 Encontrados {count} elementos 'Exportar'")
+            
+            # Tenta clicar no primeiro visível
+            if count > 0:
+                await exportar_loc.first.click(force=True)
+            else:
+                # Fallback: tenta por texto
+                print("⚠️ Tentando método alternativo...")
+                await page.get_by_text("Exportar").first.click(force=True)
             
             await page.wait_for_timeout(5000)
+
+            
             # Clicar no elemento com texto "Exportar Pedido Avançado"
             await page.get_by_text("Exportar Pedido Avançado").click()
             #await page.locator('xpath=/html[1]/body[1]/span[4]/div[1]/div[1]/div[1]').click(force=True)
