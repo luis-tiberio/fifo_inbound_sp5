@@ -168,19 +168,13 @@ async def main():
 
             print("Exportando...")
 
-            # Debug: conta quantos elementos existem
-            exportar_loc = page.locator("span").filter(has_text="Exportar")
-            count = await exportar_loc.count()
-            print(f"🔍 Encontrados {count} elementos 'Exportar'")
+            count = await page.locator('span', has_text='Exportar').count()
+            print(f'Total de spans com "Exportar": {count}')
+            count1 = await page.get_by_role('button', name='Exportar').count()
+            print(f'Total de botão com "Exportar": {count1}')
             
-            # Tenta clicar no primeiro visível
-            if count > 0:
-                await exportar_loc.first.click(force=True)
-            else:
-                # Fallback: tenta por texto
-                print("⚠️ Tentando método alternativo...")
-                await page.get_by_text("Exportar").first.click(force=True)
-            
+            # await page.get_by_role('button', name='Exportar').click(force=True)
+            await page.locator('xpath=/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div[8]/div/span/div[2]/span/span/span[2]/button/svg').click()
             await page.wait_for_timeout(5000)
 
             
