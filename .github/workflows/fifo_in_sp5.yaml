@@ -1,4 +1,4 @@
-name: Base TO Packed
+name: Base FIFO Inbound SP5
 on:
   workflow_dispatch:        # Permite execução manual
 
