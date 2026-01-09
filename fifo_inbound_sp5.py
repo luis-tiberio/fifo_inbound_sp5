@@ -156,7 +156,8 @@ async def main():
                 pass
 
             print("Exportando...")
-            await page.get_by_role('button', name='Exportar').click(force=True) #ok
+            await page.locator('xpath=//*[@id="fms-container"]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/span[1]/div[2]/span[1]/span[1]/span[1]/button[1]').click()
+            # await page.get_by_role('button', name='Exportar').click(force=True) #ok
             await page.wait_for_timeout(5000)
             # Clicar no elemento com texto "Exportar Pedido Avançado"
             await page.get_by_text("Exportar Pedido Avançado").click()
