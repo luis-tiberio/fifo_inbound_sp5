@@ -129,7 +129,7 @@ async def main():
             await page.goto("https://spx.shopee.com.br/")
             await page.wait_for_selector('xpath=//*[@placeholder="Ops ID"]', timeout=15000)
             await page.locator('xpath=//*[@placeholder="Ops ID"]').fill(OPS_ID)
-            await page.locator('xpath=//*[@placeholder="Senha"]').fill(OSP_SENHA)
+            await page.locator('xpath=//*[@placeholder="Senha"]').fill(OPS_SENHA)
             await page.wait_for_timeout(5000)
             await page.get_by_role('button', name='Entrar').click(force=True)
             #await page.locator('xpath=/html/body/div[1]/div/div[2]/div/div/div[1]/div[3]/form/div/div/button').click()
