@@ -63,7 +63,7 @@ def unzip_and_process_data(zip_path, extract_to_dir):
         df_final = pd.concat(all_dfs, ignore_index=True)
 
         print("🔎 Aplicando filtros de colunas...")
-        indices_para_manter = [0, 14, 39, 40, 48]
+        indices_para_manter = [0, 11, 36, 37, 45]
         df_final = df_final.iloc[:, indices_para_manter]
 
         shutil.rmtree(unzip_folder)  # limpa apenas a pasta de extração
@@ -123,12 +123,13 @@ async def main():
         context = await browser.new_context(accept_downloads=True, viewport={"width": 1920, "height": 1080})
         page = await context.new_page()
         try:
+            d1 = 'SoC_SP_Cravinhos'
             # === LOGIN ===
             print("Realizando login...")
             await page.goto("https://spx.shopee.com.br/")
             await page.wait_for_selector('xpath=//*[@placeholder="Ops ID"]', timeout=15000)
-            await page.locator('xpath=//*[@placeholder="Ops ID"]').fill(OPS_ID)
-            await page.locator('xpath=//*[@placeholder="Senha"]').fill(OPS_SENHA)
+            await page.locator('xpath=//*[@placeholder="Ops ID"]').fill('OPS_ID')
+            await page.locator('xpath=//*[@placeholder="Senha"]').fill('OSP_SENHA')
             await page.wait_for_timeout(5000)
             await page.get_by_role('button', name='Entrar').click(force=True)
             #await page.locator('xpath=/html/body/div[1]/div/div[2]/div/div/div[1]/div[3]/form/div/div/button').click()
@@ -163,17 +164,26 @@ async def main():
             await page.wait_for_timeout(5000)
             await page.get_by_role("treeitem", name="SOC_Received", exact=True).click(force=True)
             await page.wait_for_timeout(5000)
-            d1 = 'SoC_SP_Cravinhos'
+            
             # Seleção Cravinhos
 
             await page.get_by_text("+ adicionar à").nth(2).click()
-            
-            input1 = page.locator('xpath=/html/body/span[8]/div/div[1]/div/input') # "procurar por"
+            await page.wait_for_timeout(5000)
+
+
+            '''
+            input1 = page.locator('xpath=/html[1]/body[1]/span[8]/div[1]/div[1]/div[1]/input[1]') # "procurar por"
             input1.click()
             input1.fill(d1)
             time.sleep(5)
+            '''
 
-            await page.get_by_role("listitem", name="SoC_SP_Cravinhos", exact=True).click(force=True)
+            await page.locator('xpath=/html/body/span[6]/div/div[1]/div/input').fill('SoC_SP_Cravinhos')
+
+            await page.wait_for_timeout(5000)
+
+            await page.locator('xpath=/html[1]/body[1]/span[6]/div[1]/div[2]/div[1]/ul[1]/div[1]/div[1]/li[1]').click()
+            # await page.get_by_role("listitem", name="SoC_SP_Cravinhos", exact=True).click(force=True)
 
             await page.get_by_role("button", name="Confirmar").click(force=True)
             
