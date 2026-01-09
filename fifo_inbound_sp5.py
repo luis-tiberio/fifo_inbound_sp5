@@ -25,19 +25,20 @@ def rename_downloaded_file(DOWNLOAD_DIR, download_path):
     try:
         current_hour = datetime.datetime.now().strftime("%H")
         new_file_name = f"TO-Packed{current_hour}.zip"
-        new_file_path = os.path.join(download_dir, new_file_name)
+        
+        # CORREÇÃO: Usar DOWNLOAD_DIR (maiúsculo) conforme o argumento da função
+        new_file_path = os.path.join(DOWNLOAD_DIR, new_file_name)
+        
         if os.path.exists(new_file_path):
             os.remove(new_file_path)
+            
         shutil.move(download_path, new_file_path)
         print(f"Arquivo salvo como: {new_file_path}")
         return new_file_path
     except Exception as e:
+        # Aqui o erro aconteceu porque download_dir não existia
         print(f"Erro ao renomear o arquivo: {e}")
         return None
-
-
-
-
 
 def unzip_and_process_data(zip_path, extract_to_dir):
     """
@@ -214,8 +215,6 @@ async def main():
             
             print("Aguardando geração do relatório...")
             await page.wait_for_timeout(900000) 
-
-#PAREI AQUI RETORNAR AMANHÃ
 
             # === DOWNLOAD ===
             print("Baixando...")
