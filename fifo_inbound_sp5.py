@@ -159,7 +159,7 @@ async def main():
             await page.wait_for_timeout(5000)
 
             # await page.locator("span").filter(has_text="Exportar").first.click(force=True)
-            await page.locator('xpath=/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div[8]/div/span/div[2]/span/span').click()
+            await page.locator('xpath=/html[1]/body[1]/div[1]/div[1]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/span[1]/div[2]/span[1]/span[1]/span[2]/button[1]).click()
             # await page.locator("span").filter(has_text="Exportar").nth(2).click()
             # await page.get_by_role('button', name='Exportar').click(force=True) #ok
 
