@@ -166,15 +166,14 @@ async def main():
 
             '''
 
-            print("Exportando...")
+            print("Exportando... (TESTE)")
 
-            count = await page.locator('span', has_text='Exportar').count()
-            print(f'Total de spans com "Exportar": {count}')
-            count1 = await page.get_by_role('button', name='Exportar').count()
-            print(f'Total de botão com "Exportar": {count1}')
-            
-            # await page.get_by_role('button', name='Exportar').click(force=True)
-            await page.locator('xpath=/html/body/div[1]/div/div[2]/div[2]/div/div/div[1]/div/div[8]/div/span/div[2]/span/span/span[2]/button/svg').click()
+            frames = page.frames
+            print(f"Total de frames detectados: {len(frames)}")
+            for i, frame in enumerate(frames):
+                print(f"Frame {i}: {frame.name} - {frame.url}")
+
+            await page.locator("button.batch-actions-btn").click()
             await page.wait_for_timeout(5000)
 
             
