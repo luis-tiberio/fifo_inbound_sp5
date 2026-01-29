@@ -64,7 +64,7 @@ def unzip_and_process_data(zip_path, extract_to_dir):
         df_final = pd.concat(all_dfs, ignore_index=True)
 
         print("🔎 Aplicando filtros de colunas...")
-        indices_para_manter = [0, 14, 39, 40, 48] # [0, 11, 36, 37, 45]
+        indices_para_manter = [0, 15, 39, 40, 48] # [0, 11, 36, 37, 45]
         df_final = df_final.iloc[:, indices_para_manter]
 
         shutil.rmtree(unzip_folder)  # limpa apenas a pasta de extração
